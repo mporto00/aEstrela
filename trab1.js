@@ -1,11 +1,16 @@
 let state = [7, 8, 2, 3, 5, 4, 1, 6, 0]
 
+
 //fronteira aberta contem os objetos com custo, heuristica, estado e hash
 //fronteira fechada contem um identificador que representa o estado fechado exemplo: 24580136
-let fronteiraAberta, fronteiraFechada, estadosNoCaminho = [];
-let estadosVisitados, custoAtual, maiorTamanhoFronteira = 0;
-let estadoFinalId = 123456780;
-let estadoFinal = [1,2,3,4,5,6,7,8,0]
+let fronteiraAberta = [];
+let estadosNoCaminho = [];
+let fronteiraFechada = [];
+let estadosVisitados = 0;
+let custoAtual = 0;
+let maiorTamanhoFronteira = 0;
+let estadoFinalId = "123456780";
+let estadoFinal = [1,2,3,4,5,6,7,8,0];
 
 let estado = {
     custo: null,
@@ -15,24 +20,43 @@ let estado = {
     anterior: null
 };
 
+let estado_teste = {
+    custo: null,
+    heuristica: null,
+    estado: [1,8,2,0,4,3,7,6,5],
+    id: null,
+    anterior: null
+};
+
 function heuristicaDistancia(estados) {
     for (let i in estados){
+        let estado = estados[i].estado
         let distancia = 0;
-        for (let j in estados[i]) {
+        for (let j in estado) {
             if (estado[j] !== 0) {
                 let realPos = estadoFinal.indexOf(estado[j]);
                 let realCol = realPos % 3;
                 let realRow = Math.floor(realPos / 3);
-                let coluna = i % 3;
-                let linha = Math.floor(i / 3);
+                let coluna = j % 3;
+                let linha = Math.floor(j / 3);
                 distancia += (Math.abs(realCol - coluna) + Math.abs(realRow - linha));
             }
         }
         estados[i].heuristica = distancia;
+
     }
+
 }
 
 function heuristicaPosicao(estados) {
+    for (let i in estados){
+        let estado = estados[i].estado;
+        let posicao = 0
+        for(let j in estado){
+            estadoFinal[j] === estado[j] ? posicao++ : posicao += 0
+        }
+        estados[i].heuristica = posicao;
+    }
 
 }
 
@@ -42,10 +66,14 @@ function swap(estado, from, to) {
     estado[to] = _;
 }
 
-function ordena() {
+function ordena(tipo) {
     fronteiraAberta.sort(function (a,b) {
         if(a.heuristica !== null){
-            return a.heuristica-b.heuristica
+            if(tipo === "distancia"){
+                return a.heuristica-b.heuristica
+            }else if(tipo==="posicao"){
+                return b.heuristica-a.heuristica
+            }
         }else{
             return a.custo - b.custo
         }
@@ -61,61 +89,74 @@ function tracaCaminho(estado) {
 }
 
 function movimenta(estado, posicao, steps) {
-    let novoEstado = estado.estado;
+    let novoEstado = estado.estado.slice();
     swap(novoEstado, posicao, posicao + steps);
+    let id = novoEstado.join("");
 
     //verifica se novo estado não esta em estados fechados
-    if (!fronteiraFechada.includes(parseInt(novoEstado.join("")))) {
-        novoEstado.anterior = estado;
-        return novoEstado
+    if (!fronteiraFechada.includes(id)) {
+        let novo = {
+            custo: null,
+            heuristica: null
+        };
+        novo.id = id;
+        novo.anterior = estado;
+        novo.estado = novoEstado;
+        return novo;
     }
 }
 
 function abrirEstados(estado) {
     let estadosAbertos = [];
-    let posicao = estado.indexOf(0);
+    let posicao = estado.estado.indexOf(0);
     let linha = Math.floor(posicao / 3);
     let coluna = posicao % 3;
     if (linha > 0) {
         //abre novo estado movimentando pra cima
-        estadosAbertos.push(movimenta(estado, posicao, -3));
+        let newstate = movimenta(estado, posicao, -3)
+        if(newstate){estadosAbertos.push(newstate)};
     }
     if (coluna > 0) {
         //abre novo estado movimentando pra esquerda
-        estadosAbertos.push(movimenta(estado, posicao, -1));
+        let newstate = movimenta(estado, posicao, -1)
+        if(newstate){estadosAbertos.push(newstate)};
     }
     if (linha < 2) {
         //abre novo estado movimentando pra baixo
-        estadosAbertos.push(movimenta(estado,  posicao, 3));
+        let newstate = movimenta(estado, posicao, 3)
+        if(newstate){estadosAbertos.push(newstate)};
     }
     if (coluna < 2) {
         //abre novo estado movimentandodireita
-        estadosAbertos.push(movimenta(estado, posicao, 1));
+        let newstate = movimenta(estado, posicao, 1)
+        if(newstate){estadosAbertos.push(newstate)};
     }
     return estadosAbertos;
 }
 
-//tipo == custo || posicao || distancia
-function buscaAEstrela(estado, tipo) {
-    let identificador = estado.id = parseInt(estado.estado.join(""));
+//tipo ==  || posicao || distancia
+function buscaAEstrela(estado, tipo = "") {
+    let identificador = estado.estado.join("");
     estado.id = identificador;
 
     if(identificador === estadoFinalId){
-        let c = tracaCaminho(estado);
-        return {
+        tracaCaminho(estado);
+        custoAtual = estadosNoCaminho.length-1
+        estadosNoCaminho.forEach(el => el.custo = custoAtual--);
+        let resultado  = {
             estado: estado.estado,
             estadosVisitados: estadosVisitados +1,
-            caminho: c,
-            tamanhoCaminho: c.length,
+            caminho: estadosNoCaminho,
+            tamanhoCaminho: estadosNoCaminho.length,
             maiorFronteira: maiorTamanhoFronteira
-        }
+        };
+        console.log(resultado)
+        return;
     }
-    fronteiraAberta.push(estado);
 
     if (!fronteiraFechada.includes(identificador)){
-        let estadoAtual = fronteiraAberta.shift();
+        let estadoAtual = estado
         estadosVisitados++;
-        custoAtual++;
         //abridor de estados abre os estados e os adiciona na fronteira aberta
         let estadosAbertos = abrirEstados(estadoAtual);
         if(tipo === 'posicao'){
@@ -127,10 +168,14 @@ function buscaAEstrela(estado, tipo) {
         }
 
         fronteiraAberta = fronteiraAberta.concat(estadosAbertos);
-        ordena();
+        ordena(tipo);
         if (fronteiraAberta.length > maiorTamanhoFronteira){maiorTamanhoFronteira = fronteiraAberta.length}
         fronteiraFechada.push(identificador);
     }
 
-    buscaAEstrela(fronteiraAberta.shift())
+    buscaAEstrela(fronteiraAberta.shift(),tipo)
 }
+
+buscaAEstrela(estado_teste)
+//heuristicaPosicao(estado_teste)
+//heuristicaDistancia(estado_teste)
