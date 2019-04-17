@@ -12,7 +12,7 @@ let estadoFinal = [1,2,3,4,5,6,7,8,0];
 let estado_teste = {
     custo: 0,
     heuristica: null,
-    estado: [1,8,2,0,4,3,7,6,5],
+    estado: [1,2,8,0,3,4,7,5,6],
     id: null,
     anterior: null
 };
@@ -144,7 +144,8 @@ function buscaAEstrela(estado, tipo = "") {
         estadosVisitados = 0;
         custoAtual = 0;
         maiorTamanhoFronteira = 0;
-        console.log(resultado)
+        console.log(resultado);
+        window.resultado = resultado;
         return resultado;
     }
 
@@ -168,6 +169,5 @@ function buscaAEstrela(estado, tipo = "") {
     buscaAEstrela(fronteiraAberta.shift(),tipo)
 }
 
-buscaAEstrela(estado_teste, "distancia")
 //heuristicaPosicao(estado_teste)
 //heuristicaDistancia(estado_teste)

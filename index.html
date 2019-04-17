@@ -1,87 +1,145 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-		<meta charset="UTF-8">
-		<title>8-Puzzle</title>
-		<script type="text/javascript" src="trab1.js"></script>
-		<script	src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <meta charset="UTF-8">
+    <title>8-Puzzle</title>
+    <script type="text/javascript" src="trab1.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
 </head>
 <style>
-		table.tabuleiro {
-				font-family: "Courier New", Courier, monospace;
-				background-color: #E2E2E2;
-				width: 300px;
-				height: 300px;
-		}
+    table.tabuleiro {
+        font-family: "Courier New", Courier, monospace;
+        background-color: #E2E2E2;
+        width: 300px;
+        height: 300px;
+    }
+    table.tinytable {
+        font-family: "Courier New", Courier, monospace;
+        background-color: #c9e2ce;
+        width: 100px;
+        height: 100px;
+        text-align: center;
+    }
 
-		.text{
-				font-family: "Courier New", Courier, monospace;
-				background-color: #E2E2E2;
-				text-align: center;
-				font-size: 25px;
-				font-weight: bold;
-				height: 100px;
-				width: 100px;
-				border: none;
-		}
+    .text {
+        font-family: "Courier New", Courier, monospace;
+        background-color: #E2E2E2;
+        text-align: center;
+        font-size: 25px;
+        font-weight: bold;
+        height: 100px;
+        width: 100px;
+        border: none;
+    }
 
-		.button{
-				margin-top: 10px;
-		}
-		table.tabuleiro td, table.tabuleiro th {
-				border: 3px solid #443D35;
-				padding: 4px 4px;
-		}
-		table.tabuleiro tbody td {
-				font-size: 25px;
-				font-weight: bold;
-		}
+    .button {
+        margin-top: 10px;
+    }
+
+    table.tabuleiro td, table.tabuleiro th {
+        border: 3px solid #443D35;
+        padding: 4px 4px;
+    }
+
+    table.tinytable td, table.tinytable th {
+        border: 1px solid #443D35;
+        padding: 2px 2px;
+        font-size: 14px
+    }
+
+    table.tabuleiro tbody td {
+        font-size: 25px;
+        font-weight: bold;
+    }
+
+
 
 </style>
 <script>
-	function exec(type) {
-	  let inputestado = {
-		  custo: 0,
-		  heuristica: null,
-		  estado: [],
-		  id: null,
-		  anterior: null
-	  };
+  function exec(type) {
+    $("#estados").empty()
+    let inputestado = {
+      custo: 0,
+      heuristica: null,
+      estado: [],
+      id: null,
+      anterior: null
+    };
 
-	  for(let i=0; i<9; i++){
-	  	inputestado.estado.push(parseInt(document.getElementById(i.toString()).value))
-		}
-	  buscaAEstrela(inputestado,type);
+    for (let i = 0; i < 9; i++) {
+      inputestado.estado.push(parseInt(document.getElementById(i.toString()).value))
+    }
+    buscaAEstrela(inputestado, type);
+    let resultado = window.resultado;
+    let nivel = resultado.tamanhoCaminho-1;
+    for(let idx in resultado.caminho){
+      let estado = resultado.caminho[idx].estado
+      let table = $(`<div style="display: inline-flex">
+                        <table class="tinytable" style="margin: 0px 20px 50px 20px">
+                            <tbody>
+                            <tr>
+                                <td>${estado[0]}</td>
+                                <td>${estado[1]}</td>
+                                <td>${estado[2]}</td>
+                            </tr>
+                            <tr>
+                                <td>${estado[3]}</td>
+                                <td>${estado[4]}</td>
+                                <td>${estado[5]}</td>
+                            </tr>
+                            <tr>
+                                <td>${estado[6]}</td>
+                                <td>${estado[7]}</td>
+                                <td>${estado[8]}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <div>
+                            <p>Nível: ${nivel}</p>
+                            <p>Custo: ${resultado.caminho[idx].custo}</p>
+                            <p>Heurística: ${resultado.caminho[idx].heuristica ? resultado.caminho[idx].heuristica : 'Sem Heurística'} </p></div>
+                    </div>`);
+      $("#estados").prepend(table);
+      nivel--
+      ;
+
+    }
+    $("#estados").prepend($(`<h2 style="margin-left: 20px"><p>Tamanho do caminho: ${resultado.tamanhoCaminho} | Maior fronteira aberta: ${resultado.maiorFronteira}</p></h2>`))
+
+
   }
 </script>
 <body style="display: inline-flex">
 <div>
-	<table class="tabuleiro">
-		<tbody>
-				<tr>
-						<td><input type="text" class="text" id="0">1</td>
-						<td><input type="text" class="text" id="1">8</td>
-						<td><input type="text" class="text" id="2">2</td>
-				</tr>
-				<tr>
-					<td><input type="text" class="text" id="3">0</td>
-					<td><input type="text" class="text" id="4">4</td>
-					<td><input type="text" class="text" id="5">3</td>
-				</tr>
-				<tr>
-					<td><input type="text" class="text" id="6">7</td>
-					<td><input type="text" class="text" id="7">6</td>
-					<td><input type="text" class="text" id="8">5</td>
-				</tr>
-		</tbody>
-	</table>
-		<div>
-				<input type="button" value="Busca A* sem heuristica, somente custo" class="button" onclick="exec('custo')"><br>
-				<input type="button" value="Busca A* com heuristica de posição" class="button" onclick="exec('posicao')"><br>
-				<input type="button" value="Busca A* com heuristica de distancia" class="button" onclick="exec('distancia')">
-		</div>
+    <table class="tabuleiro">
+        <tbody>
+        <tr>
+            <td><input type="text" class="text" id="0"></td>
+            <td><input type="text" class="text" id="1"></td>
+            <td><input type="text" class="text" id="2"></td>
+        </tr>
+        <tr>
+            <td><input type="text" class="text" id="3"></td>
+            <td><input type="text" class="text" id="4"></td>
+            <td><input type="text" class="text" id="5"></td>
+        </tr>
+        <tr>
+            <td><input type="text" class="text" id="6"></td>
+            <td><input type="text" class="text" id="7"></td>
+            <td><input type="text" class="text" id="8"></td>
+        </tr>
+        </tbody>
+    </table>
+    <div>
+        <input type="button" value="Busca A* sem heuristica, somente custo" class="button" onclick="exec('custo')"><br>
+        <input type="button" value="Busca A* com heuristica de posição" class="button" onclick="exec('posicao')"><br>
+        <input type="button" value="Busca A* com heuristica de distancia" class="button" onclick="exec('distancia')">
+    </div>
 
 </div>
-<div></div>
+<div id="estados">
+
+</div>
 </body>
 </html>
