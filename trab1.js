@@ -1,6 +1,3 @@
-let state = [7, 8, 2, 3, 5, 4, 1, 6, 0]
-
-
 //fronteira aberta contem os objetos com custo, heuristica, estado e hash
 //fronteira fechada contem um identificador que representa o estado fechado exemplo: 24580136
 let fronteiraAberta = [];
@@ -12,16 +9,8 @@ let maiorTamanhoFronteira = 0;
 let estadoFinalId = "123456780";
 let estadoFinal = [1,2,3,4,5,6,7,8,0];
 
-let estado = {
-    custo: null,
-    heuristica: null,
-    estado: null,
-    id: null,
-    anterior: null
-};
-
 let estado_teste = {
-    custo: null,
+    custo: 0,
     heuristica: null,
     estado: [1,8,2,0,4,3,7,6,5],
     id: null,
@@ -42,7 +31,7 @@ function heuristicaDistancia(estados) {
                 distancia += (Math.abs(realCol - coluna) + Math.abs(realRow - linha));
             }
         }
-        estados[i].heuristica = distancia;
+        estados[i].heuristica = distancia + estados[i].custo;
 
     }
 
@@ -55,7 +44,7 @@ function heuristicaPosicao(estados) {
         for(let j in estado){
             estadoFinal[j] === estado[j] ? posicao++ : posicao += 0
         }
-        estados[i].heuristica = posicao;
+        estados[i].heuristica = posicao - estados[i].custo;
     }
 
 }
@@ -109,27 +98,28 @@ function movimenta(estado, posicao, steps) {
 function abrirEstados(estado) {
     let estadosAbertos = [];
     let posicao = estado.estado.indexOf(0);
+    let custo = (estado.custo) +1;
     let linha = Math.floor(posicao / 3);
     let coluna = posicao % 3;
     if (linha > 0) {
         //abre novo estado movimentando pra cima
         let newstate = movimenta(estado, posicao, -3)
-        if(newstate){estadosAbertos.push(newstate)};
+        if(newstate){newstate.custo = custo; estadosAbertos.push(newstate)};
     }
     if (coluna > 0) {
         //abre novo estado movimentando pra esquerda
         let newstate = movimenta(estado, posicao, -1)
-        if(newstate){estadosAbertos.push(newstate)};
+        if(newstate){newstate.custo = custo; estadosAbertos.push(newstate)};
     }
     if (linha < 2) {
         //abre novo estado movimentando pra baixo
         let newstate = movimenta(estado, posicao, 3)
-        if(newstate){estadosAbertos.push(newstate)};
+        if(newstate){newstate.custo = custo; estadosAbertos.push(newstate)};
     }
     if (coluna < 2) {
         //abre novo estado movimentandodireita
         let newstate = movimenta(estado, posicao, 1)
-        if(newstate){estadosAbertos.push(newstate)};
+        if(newstate){newstate.custo = custo; estadosAbertos.push(newstate)};
     }
     return estadosAbertos;
 }
@@ -141,8 +131,6 @@ function buscaAEstrela(estado, tipo = "") {
 
     if(identificador === estadoFinalId){
         tracaCaminho(estado);
-        custoAtual = estadosNoCaminho.length-1
-        estadosNoCaminho.forEach(el => el.custo = custoAtual--);
         let resultado  = {
             estado: estado.estado,
             estadosVisitados: estadosVisitados +1,
@@ -150,8 +138,13 @@ function buscaAEstrela(estado, tipo = "") {
             tamanhoCaminho: estadosNoCaminho.length,
             maiorFronteira: maiorTamanhoFronteira
         };
-        console.log(resultado)
-        return;
+        fronteiraAberta = [];
+        estadosNoCaminho = [];
+        fronteiraFechada = [];
+        estadosVisitados = 0;
+        custoAtual = 0;
+        maiorTamanhoFronteira = 0;
+        return resultado;
     }
 
     if (!fronteiraFechada.includes(identificador)){
@@ -163,8 +156,6 @@ function buscaAEstrela(estado, tipo = "") {
             heuristicaPosicao(estadosAbertos);
         }else if(tipo === 'distancia'){
             heuristicaDistancia(estadosAbertos);
-        }else{
-            estadosAbertos.forEach(el => el.custo = custoAtual);
         }
 
         fronteiraAberta = fronteiraAberta.concat(estadosAbertos);
