@@ -31,7 +31,7 @@ function heuristicaDistancia(estados) {
                 distancia += (Math.abs(realCol - coluna) + Math.abs(realRow - linha));
             }
         }
-        estados[i].heuristica = distancia + estados[i].custo;
+        estados[i].heuristica = distancia - estados[i].custo;
 
     }
 
@@ -44,7 +44,7 @@ function heuristicaPosicao(estados) {
         for(let j in estado){
             estadoFinal[j] === estado[j] ? posicao++ : posicao += 0
         }
-        estados[i].heuristica = posicao - estados[i].custo;
+        estados[i].heuristica = posicao + estados[i].custo;
     }
 
 }
@@ -144,6 +144,7 @@ function buscaAEstrela(estado, tipo = "") {
         estadosVisitados = 0;
         custoAtual = 0;
         maiorTamanhoFronteira = 0;
+        console.log(resultado)
         return resultado;
     }
 
@@ -167,6 +168,6 @@ function buscaAEstrela(estado, tipo = "") {
     buscaAEstrela(fronteiraAberta.shift(),tipo)
 }
 
-buscaAEstrela(estado_teste)
+buscaAEstrela(estado_teste, "distancia")
 //heuristicaPosicao(estado_teste)
 //heuristicaDistancia(estado_teste)
